@@ -143,14 +143,19 @@ Interactive sessions don't need any of this — the trust dialog and live permis
 
 ## Live statusline (opt-in)
 
-An optional Claude Code statusline shows mission progress whenever your session's cwd is inside a repo with an active `mission/` dir. Your normal statusline keeps rendering exactly as before; the mission row appears on its own line beneath it (each printed line is a row, per the statusline contract):
+An optional Claude Code statusline shows live mission progress. Your normal statusline keeps rendering exactly as before; the mission row appears on its own line beneath it (each printed line is a row, per the statusline contract) — and only in the session that is actually running the mission:
 
 ```
 <your normal statusline, unchanged>
-▣ 3/5 ▓▓▓░░ · m1-f3-readme-edges (worker 4m) · 1 fix queued
+ MISSION  10/27 ▓▓▓░░░░░░░ 37% ┃ M2 4/9 ┃ ▶ m2-f4-exam-generation · WORKER 12m RETRY 2/3 ┃ RUN 1h42m ┃ 1 FIX
 ```
 
-The mission row shows progress counts and a compact bar, the feature currently running (kind, elapsed time, and `retry 2/3` when it's on a repeat attempt), queued `fix` features, and a green `✔ mission complete` when everything has passed. In any session *without* a mission you see just your normal bar: the exact statusline command you had before enabling keeps running (with the same stdin Claude Code would give it), or a minimal `<dir> · <model>` default if you had none — never a blank bar.
+Left to right: overall progress with a block bar and percentage, milestone-local progress, the feature currently running (kind, elapsed, and a yellow `RETRY n/3` on repeat attempts), total mission running time (since the first `progress_log.jsonl` event), then a yellow fix-queue count and a red `BLOCKED` count when nonzero. When everything has passed you get an inverse green `✔ MISSION COMPLETE` chip instead.
+
+Two scoping rules keep it out of your way:
+
+- **Session-scoped**: the row renders only in the session where `/mission-run` is executing — detected by checking the session's transcript for the mission-run goal text, since Claude Code gives the statusline a `transcript_path` but offers no session handshake. Other sessions in the same repo (and every session in non-mission repos) just show your normal bar.
+- **Passthrough**: the exact statusline command you had before enabling keeps running with the same stdin Claude Code would give it, or you get a minimal `<dir> · <model>` default if you had none — never a blank bar.
 
 ```bash
 ./statusline.sh enable    # opt in
