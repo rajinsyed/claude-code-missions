@@ -148,7 +148,7 @@ cat > "$MDIR/features.json" <<'EOF'
     {"id": "m1-f1", "kind": "implementation", "milestone": "1", "status": "passed",      "attempts": 1},
     {"id": "m1-f2", "kind": "implementation", "milestone": "1", "status": "passed",      "attempts": 1},
     {"id": "m1-f3-readme-edges", "kind": "implementation", "milestone": "1", "status": "in_progress", "attempts": 2},
-    {"id": "m1-fix1", "kind": "fix", "milestone": "1", "status": "pending", "attempts": 0}
+    {"id": "m1-fix1", "kind": "fix", "milestone": "2", "status": "pending", "attempts": 0}
   ]
 }
 EOF
@@ -178,7 +178,9 @@ if [ "$rc" -ne 0 ] || [ -z "$out" ]; then
   note "STL-03: mission case errored (rc=$rc) or printed nothing"
   stl03=1
 fi
-for frag in "MISSION" "2/4" "█" "50%" "M1 2/4" "m1-f3-readme-edges" "WORKER" "RETRY 2/3" "1 FIX" "RUN " ; do
+# "▏" is the milestone gate mark in the segmented bar (fixture spans
+# milestones 1 and 2, so exactly one gate must render).
+for frag in "MISSION" "2/4" "█" "▏" "M1 2/3" "m1-f3-readme-edges" "WORKER" "RETRY 2/3" "1 FIX" "RUN " ; do
   case "$out" in
     *"$frag"*) : ;;
     *) note "STL-03: output missing '$frag': '$out'"; stl03=1 ;;

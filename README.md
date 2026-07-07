@@ -147,10 +147,10 @@ An optional Claude Code statusline shows live mission progress. Your normal stat
 
 ```
 <your normal statusline, unchanged>
- MISSION  10/27 ▓▓▓░░░░░░░ 37% ┃ M2 4/9 ┃ ▶ m2-f4-exam-generation · WORKER 12m RETRY 2/3 ┃ RUN 1h42m ┃ 1 FIX
+ MISSION  12/27 [███▏██░▏░░░▏░░░]  │  M2 5/7  │  ▶ m2-f4-exam-generation · WORKER 12m  │  RUN 3h48m
 ```
 
-Left to right: overall progress with a block bar and percentage, milestone-local progress, the feature currently running (kind, elapsed, and a yellow `RETRY n/3` on repeat attempts), total mission running time (since the first `progress_log.jsonl` event), then a yellow fix-queue count and a red `BLOCKED` count when nonzero. When everything has passed you get an inverse green `✔ MISSION COMPLETE` chip instead.
+Left to right: overall progress with a **milestone-segmented bar** — one segment per milestone, sized by feature count and filled by that milestone's own progress, with thin gate marks between segments, so you see where the milestone gates are, not just a percentage — then milestone-local progress, the feature currently running (kind, elapsed, and a red `RETRY n/3` on repeat attempts), total mission running time (since the first `progress_log.jsonl` event), then an orange fix-queue count and a red `BLOCKED` count when nonzero. When everything has passed you get a green `✔ MISSION COMPLETE` chip instead.
 
 Two scoping rules keep it out of your way:
 
