@@ -170,12 +170,12 @@ DIM=$'\033[2m'
 GRAY=$'\033[38;5;242m'
 DARK=$'\033[38;5;237m'
 RESET=$'\033[0m'
-YELLOW_FG=$'\033[38;5;220m'
+BAR_FG=$'\033[38;2;175;175;94m'      # #AFAF5E (truecolor; bar fill + %)
 CYAN_FG=$'\033[1;38;5;45m'
 GREEN_FG=$'\033[1;38;5;46m'
 ORANGE_FG=$'\033[1;38;5;214m'
 RED_FG=$'\033[1;38;5;196m'
-CHIP_BRAND=$'\033[1;30;48;5;202m'    # black on #FF5F00 (256-color 202 is exact)
+CHIP_BRAND=$'\033[1;97;48;5;202m'    # white on #FF5F00 (256-color 202 is exact)
 CHIP_GREEN=$'\033[1;30;48;5;46m'     # black on green
 SEP="  ${DARK}│${RESET}  "
 
@@ -190,7 +190,7 @@ while [ "$j" -lt 10 ]; do
   if [ "$j" -lt "$FILLED" ]; then FILL="${FILL}█"; else EMPTY="${EMPTY}░"; fi
   j=$((j + 1))
 done
-BAR="${GRAY}[${RESET}${YELLOW_FG}${FILL}${RESET}${DARK}${EMPTY}${RESET}${GRAY}]${RESET}"
+BAR="${GRAY}[${RESET}${BAR_FG}${FILL}${RESET}${DARK}${EMPTY}${RESET}${GRAY}]${RESET}"
 
 RUNSEG="$(run_segment)"
 
@@ -202,7 +202,7 @@ if [ "$COMPLETE" = "1" ]; then
   exit 0
 fi
 
-LINE="${CHIP_BRAND} MISSION ${RESET} ${BOLD}${DONE}/${TOTAL}${RESET} ${BAR} ${YELLOW_FG}${PCT}%${RESET}"
+LINE="${CHIP_BRAND} MISSION ${RESET} ${BOLD}${DONE}/${TOTAL}${RESET} ${BAR} ${BAR_FG}${PCT}%${RESET}"
 
 # Milestone-local progress (only when a feature is running and carries one).
 if [ "$MS" != "-" ] && [ "$MS_TOTAL" -gt 0 ] 2>/dev/null; then
