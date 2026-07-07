@@ -179,63 +179,18 @@ CHIP_BRAND=$'\033[1;97;48;5;202m'    # bold bright-white on #FF5F00
 CHIP_GREEN=$'\033[1;30;48;5;46m'     # black on green
 SEP="  ${DARK}│${RESET}  "
 
-# Milestone-segmented bar: one segment per milestone (features.json order),
-# each segment's width proportional to its feature count (min 1 cell),
-# filled by that milestone's own progress, with thin gate marks between
-# segments — the bar shows WHERE the milestone gates are, not just a
-# percentage. Falls back to a single plain segment if milestone data is
-# missing or unreadable.
-BARW=12
-SEGS=""
-if [ "$TOTAL" -gt 0 ] 2>/dev/null; then
-  SEGS="$(jq -r '
-    .features as $f
-    | ($f | map(.milestone // "?" | tostring)
-         | reduce .[] as $m ([]; if index($m) then . else . + [$m] end)) as $order
-    | $order[] as $m
-    | [([$f[] | select(((.milestone // "?") | tostring) == $m
-          and (.status == "passed" or .status == "completed"))] | length),
-       ([$f[] | select(((.milestone // "?") | tostring) == $m)] | length)]
-    | @tsv
-  ' "$MISSION_DIR/features.json" 2>/dev/null || true)"
-fi
-
-BODY=""
-if [ -n "$SEGS" ]; then
-  first=1
-  while IFS=$'\t' read -r sd st; do
-    [ -n "$st" ] && [ "$st" -gt 0 ] 2>/dev/null || continue
-    cells=$(((st * BARW + TOTAL / 2) / TOTAL))
-    [ "$cells" -lt 1 ] && cells=1
-    fill=$((sd * cells / st))
-    [ "$sd" -eq "$st" ] && fill=$cells
-    [ "$first" -eq 1 ] || BODY="${BODY}${GRAY}▏${RESET}"
-    first=0
-    seg_f=""
-    seg_e=""
-    k=0
-    while [ "$k" -lt "$cells" ]; do
-      if [ "$k" -lt "$fill" ]; then seg_f="${seg_f}█"; else seg_e="${seg_e}░"; fi
-      k=$((k + 1))
-    done
-    BODY="${BODY}${BAR_FG}${seg_f}${RESET}${DARK}${seg_e}${RESET}"
-  done <<EOF
-$SEGS
-EOF
-fi
-if [ -z "$BODY" ]; then
-  FILLED=0
-  [ "$TOTAL" -gt 0 ] 2>/dev/null && FILLED=$((DONE * 10 / TOTAL))
-  seg_f=""
-  seg_e=""
-  j=0
-  while [ "$j" -lt 10 ]; do
-    if [ "$j" -lt "$FILLED" ]; then seg_f="${seg_f}█"; else seg_e="${seg_e}░"; fi
-    j=$((j + 1))
-  done
-  BODY="${BAR_FG}${seg_f}${RESET}${DARK}${seg_e}${RESET}"
-fi
-BAR="${GRAY}[${RESET}${BODY}${GRAY}]${RESET}"
+FILLED=0
+[ "$TOTAL" -gt 0 ] 2>/dev/null && FILLED=$((DONE * 10 / TOTAL))
+PCT=0
+[ "$TOTAL" -gt 0 ] 2>/dev/null && PCT=$((DONE * 100 / TOTAL))
+FILL=""
+EMPTY=""
+j=0
+while [ "$j" -lt 10 ]; do
+  if [ "$j" -lt "$FILLED" ]; then FILL="${FILL}█"; else EMPTY="${EMPTY}░"; fi
+  j=$((j + 1))
+done
+BAR="${GRAY}[${RESET}${BAR_FG}${FILL}${RESET}${DARK}${EMPTY}${RESET}${GRAY}]${RESET}"
 
 RUNSEG="$(run_segment)"
 
@@ -247,8 +202,7 @@ if [ "$COMPLETE" = "1" ]; then
   exit 0
 fi
 
-# The segmented bar carries the proportion visually — no % number needed.
-LINE="${CHIP_BRAND} MISSION ${RESET} ${BOLD}${DONE}/${TOTAL}${RESET} ${BAR}"
+LINE="${CHIP_BRAND} MISSION ${RESET} ${BOLD}${DONE}/${TOTAL}${RESET} ${BAR} ${BAR_FG}${PCT}%${RESET}"
 
 # Milestone-local progress (only when a feature is running and carries one).
 if [ "$MS" != "-" ] && [ "$MS_TOTAL" -gt 0 ] 2>/dev/null; then
