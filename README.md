@@ -157,6 +157,8 @@ Two scoping rules keep it out of your way:
 - **Session-scoped**: the row renders only in the session where `/mission-run` is executing — detected by checking the session's transcript for the mission-run goal text, since Claude Code gives the statusline a `transcript_path` but offers no session handshake. Other sessions in the same repo (and every session in non-mission repos) just show your normal bar.
 - **Passthrough**: the exact statusline command you had before enabling keeps running with the same stdin Claude Code would give it, or you get a minimal `<dir> · <model>` default if you had none — never a blank bar.
 
+`enable` also sets `refreshInterval: 10`, so the elapsed and runtime segments keep ticking every 10 seconds even while the orchestrator sits idle waiting on a subagent — without it, the statusline only refreshes on assistant messages and mode changes.
+
 ```bash
 ./statusline.sh enable    # opt in
 ./statusline.sh status    # wired up? mission detected here?

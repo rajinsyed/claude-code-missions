@@ -67,12 +67,15 @@ case "$1" in
       cp "$SETTINGS" "$BAK_FILE" || exit 1
       out="$(jq -n --argjson sl "$SAVED" '{settingsExisted: true, statusLine: $sl}')" || exit 1
       printf '%s\n' "$out" > "$PREV_FILE" || exit 1
-      out="$(jq --arg cmd "$CMD_STRING" '.statusLine = {type: "command", command: $cmd}' "$SETTINGS")" || exit 1
+      # refreshInterval re-runs the command every 10s so the mission row's
+      # elapsed/runtime segments keep ticking while the orchestrator idles
+      # waiting on subagents (the docs recommend it for exactly this case).
+      out="$(jq --arg cmd "$CMD_STRING" '.statusLine = {type: "command", command: $cmd, refreshInterval: 10}' "$SETTINGS")" || exit 1
       write_settings "$out"
     else
       out="$(jq -n '{settingsExisted: false, statusLine: null}')" || exit 1
       printf '%s\n' "$out" > "$PREV_FILE" || exit 1
-      out="$(jq -n --arg cmd "$CMD_STRING" '{statusLine: {type: "command", command: $cmd}}')" || exit 1
+      out="$(jq -n --arg cmd "$CMD_STRING" '{statusLine: {type: "command", command: $cmd, refreshInterval: 10}}')" || exit 1
       write_settings "$out"
     fi
     echo "statusline.sh: mission statusline enabled — previous statusLine saved to $PREV_FILE"
