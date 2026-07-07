@@ -160,55 +160,55 @@ fmt_elapsed() {
 }
 
 # --- Assemble the brutalist row ----------------------------------------------
-# Neobrutalist: high-contrast warning-label chips (black text on saturated
-# 256-color backgrounds), a solid block bar in the accent color, dim `┃`
-# separators, uppercase labels. Accents: yellow = the mission brand chip +
-# bar, cyan = milestone, orange = the agent working right now, red chips =
-# retries/blocked, green chip = complete.
+# One saturated chip as the anchor, everything else typographic. The bar is
+# bracketed like Claude Code's own context bar in the row above, so the two
+# rows read as one instrument panel. Accents: yellow = mission brand (chip
+# + bar fill), cyan = milestone, green = play marker, orange = the agent
+# working right now, red = retries/blocked, green chip = complete.
 BOLD=$'\033[1m'
 DIM=$'\033[2m'
-GRAY=$'\033[38;5;240m'
+GRAY=$'\033[38;5;242m'
+DARK=$'\033[38;5;237m'
 RESET=$'\033[0m'
 YELLOW_FG=$'\033[38;5;220m'
-CYAN_FG=$'\033[1;38;5;51m'
+CYAN_FG=$'\033[1;38;5;45m'
 GREEN_FG=$'\033[1;38;5;46m'
-ORANGE_FG=$'\033[38;5;208m'
+ORANGE_FG=$'\033[1;38;5;214m'
+RED_FG=$'\033[1;38;5;196m'
 CHIP_YELLOW=$'\033[1;30;48;5;220m'   # black on yellow
-CHIP_ORANGE=$'\033[1;30;48;5;208m'   # black on orange
-CHIP_RED=$'\033[1;37;48;5;196m'      # white on red
 CHIP_GREEN=$'\033[1;30;48;5;46m'     # black on green
-SEP=" ${GRAY}┃${RESET} "
+SEP="  ${DARK}│${RESET}  "
 
 FILLED=0
 [ "$TOTAL" -gt 0 ] 2>/dev/null && FILLED=$((DONE * 10 / TOTAL))
 PCT=0
 [ "$TOTAL" -gt 0 ] 2>/dev/null && PCT=$((DONE * 100 / TOTAL))
-BAR="$YELLOW_FG"
+FILL=""
+EMPTY=""
 j=0
 while [ "$j" -lt 10 ]; do
-  if [ "$j" -eq "$FILLED" ]; then BAR="${BAR}${RESET}${GRAY}"; fi
-  if [ "$j" -lt "$FILLED" ]; then BAR="${BAR}█"; else BAR="${BAR}░"; fi
+  if [ "$j" -lt "$FILLED" ]; then FILL="${FILL}█"; else EMPTY="${EMPTY}░"; fi
   j=$((j + 1))
 done
-BAR="${BAR}${RESET}"
+BAR="${GRAY}[${RESET}${YELLOW_FG}${FILL}${RESET}${DARK}${EMPTY}${RESET}${GRAY}]${RESET}"
 
 RUNSEG="$(run_segment)"
 
 if [ "$COMPLETE" = "1" ]; then
   LINE="${CHIP_GREEN} ✔ MISSION COMPLETE ${RESET} ${BOLD}${DONE}/${TOTAL}${RESET} ${BAR}"
-  [ "$BLOCKED" -gt 0 ] 2>/dev/null && LINE="${LINE}${SEP}${CHIP_RED} ${BLOCKED} BLOCKED ${RESET}"
-  [ -n "$RUNSEG" ] && LINE="${LINE}${SEP}${DIM}${RUNSEG}${RESET}"
+  [ "$BLOCKED" -gt 0 ] 2>/dev/null && LINE="${LINE}${SEP}${RED_FG}${BLOCKED} BLOCKED${RESET}"
+  [ -n "$RUNSEG" ] && LINE="${LINE}${SEP}${GRAY}${RUNSEG}${RESET}"
   printf '%s\n' "$LINE"
   exit 0
 fi
 
-LINE="${CHIP_YELLOW} MISSION ${RESET} ${BOLD}${DONE}/${TOTAL}${RESET} ${BAR} ${BOLD}${PCT}%${RESET}"
+LINE="${CHIP_YELLOW} MISSION ${RESET} ${BOLD}${DONE}/${TOTAL}${RESET} ${BAR} ${YELLOW_FG}${PCT}%${RESET}"
 
 # Milestone-local progress (only when a feature is running and carries one).
 if [ "$MS" != "-" ] && [ "$MS_TOTAL" -gt 0 ] 2>/dev/null; then
   msname="$MS"
   case "$msname" in m*|M*) msname="${msname#m}"; msname="${msname#M}" ;; esac
-  LINE="${LINE}${SEP}${CYAN_FG}M${msname}${RESET} ${MS_DONE}/${MS_TOTAL}"
+  LINE="${LINE}${SEP}${CYAN_FG}M${msname}${RESET} ${MS_DONE}${GRAY}/${MS_TOTAL}${RESET}"
 fi
 
 if [ -n "$CUR_ID" ]; then
@@ -220,16 +220,16 @@ if [ -n "$CUR_ID" ]; then
     *)               KLABEL="AGENT" ;;
   esac
   EL="$(fmt_elapsed "$MISSION_DIR/.current-feature")"
-  CURSEG="${GREEN_FG}▶${RESET} ${BOLD}${CUR_ID}${RESET} ${CHIP_ORANGE} ${KLABEL} ${RESET}${EL:+ ${ORANGE_FG}${EL}${RESET}}"
-  [ "$ATTEMPTS" -gt 1 ] 2>/dev/null && CURSEG="${CURSEG} ${CHIP_RED} RETRY ${ATTEMPTS}/3 ${RESET}"
+  CURSEG="${GREEN_FG}▶${RESET} ${BOLD}${CUR_ID}${RESET} ${GRAY}·${RESET} ${ORANGE_FG}${KLABEL}${EL:+ $EL}${RESET}"
+  [ "$ATTEMPTS" -gt 1 ] 2>/dev/null && CURSEG="${CURSEG} ${GRAY}·${RESET} ${RED_FG}RETRY ${ATTEMPTS}/3${RESET}"
   LINE="${LINE}${SEP}${CURSEG}"
 else
-  LINE="${LINE}${SEP}${DIM}IDLE${RESET}"
+  LINE="${LINE}${SEP}${GRAY}IDLE${RESET}"
 fi
 
-[ -n "$RUNSEG" ] && LINE="${LINE}${SEP}${DIM}${RUNSEG}${RESET}"
-[ "$FIXES" -gt 0 ] 2>/dev/null && LINE="${LINE}${SEP}${CHIP_ORANGE} ${FIXES} FIX ${RESET}"
-[ "$BLOCKED" -gt 0 ] 2>/dev/null && LINE="${LINE}${SEP}${CHIP_RED} ${BLOCKED} BLOCKED ${RESET}"
+[ -n "$RUNSEG" ] && LINE="${LINE}${SEP}${GRAY}${RUNSEG}${RESET}"
+[ "$FIXES" -gt 0 ] 2>/dev/null && LINE="${LINE}${SEP}${ORANGE_FG}${FIXES} FIX${RESET}"
+[ "$BLOCKED" -gt 0 ] 2>/dev/null && LINE="${LINE}${SEP}${RED_FG}${BLOCKED} BLOCKED${RESET}"
 
 printf '%s\n' "$LINE"
 exit 0
