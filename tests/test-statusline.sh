@@ -178,7 +178,7 @@ if [ "$rc" -ne 0 ] || [ -z "$out" ]; then
   note "STL-03: mission case errored (rc=$rc) or printed nothing"
   stl03=1
 fi
-for frag in "MISSION" "2/4" "▓" "50%" "M1 2/4" "m1-f3-readme-edges" "WORKER" "RETRY 2/3" "1 FIX" "RUN " ; do
+for frag in "MISSION" "2/4" "█" "50%" "M1 2/4" "m1-f3-readme-edges" "WORKER" "RETRY 2/3" "1 FIX" "RUN " ; do
   case "$out" in
     *"$frag"*) : ;;
     *) note "STL-03: output missing '$frag': '$out'"; stl03=1 ;;
