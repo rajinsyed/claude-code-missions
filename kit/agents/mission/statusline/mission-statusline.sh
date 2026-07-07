@@ -175,7 +175,7 @@ CYAN_FG=$'\033[1;38;5;45m'
 GREEN_FG=$'\033[1;38;5;46m'
 ORANGE_FG=$'\033[1;38;5;214m'
 RED_FG=$'\033[1;38;5;196m'
-CHIP_BRAND=$'\033[1;97;48;5;202m'    # white on #FF5F00 (256-color 202 is exact)
+CHIP_BRAND=$'\033[1;30;48;5;202m'    # black on #FF5F00 — 6.9:1 contrast (white is 3.0:1)
 CHIP_GREEN=$'\033[1;30;48;5;46m'     # black on green
 SEP="  ${DARK}│${RESET}  "
 
