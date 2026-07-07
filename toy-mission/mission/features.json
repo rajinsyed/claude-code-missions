@@ -1,0 +1,64 @@
+{
+  "features": [
+    {
+      "id": "m1-f1-core-counting",
+      "description": "Implement the core counting logic of wordstats.sh plus the test runner. Create wordstats.sh at the repo root (bash + a single awk program, per mission/architecture.md): given a readable text file argument, print (1) the total word count, (2) the unique word count (case-insensitive), (3) up to three lines listing the most frequent words with their counts in descending frequency order (ties may break alphabetically). Also create tests/wordstats_test.sh: a plain bash runner that builds fixture files under mktemp -d, asserts the counts on the fixture text 'the quick brown fox jumps over the lazy dog the fox' (total 11, unique 8, top words the=3 then fox=2), asserts top-3 ordering, prints per-case PASS/FAIL lines, and exits 0 only when all cases pass. Run bash tests/wordstats_test.sh from the repo root and make it green before handing off. Argument-error handling and --help are feature f2; do not block on them (a minimal file argument path is enough for this feature).",
+      "kind": "implementation",
+      "milestone": "1",
+      "fulfills": ["TOY-04", "TOY-05", "TOY-06", "TOY-08"],
+      "preconditions": [],
+      "status": "pending",
+      "attempts": 0,
+      "handoffs": [],
+      "fixes": null
+    },
+    {
+      "id": "m1-f2-cli-args",
+      "description": "Add CLI argument parsing, --help, and error handling to wordstats.sh (see mission/architecture.md contract). Required behavior: no argument -> usage error on stderr and non-zero exit; argument names a file that does not exist or is unreadable -> error naming that file on stderr and non-zero exit; --help (and -h) -> usage text on stdout containing the word 'Usage' and the tool name 'wordstats', exit 0. Extend tests/wordstats_test.sh with cases for all three behaviors (check both output and exit codes). Run bash tests/wordstats_test.sh from the repo root and make it green before handing off.",
+      "kind": "implementation",
+      "milestone": "1",
+      "fulfills": ["TOY-01", "TOY-02", "TOY-03"],
+      "preconditions": ["m1-f1-core-counting completed"],
+      "status": "pending",
+      "attempts": 0,
+      "handoffs": [],
+      "fixes": null
+    },
+    {
+      "id": "m1-f3-readme-edge-cases",
+      "description": "Write the repo README.md and handle edge cases. README.md at the repo root must document what wordstats is, usage (./wordstats.sh <file>, --help), example output, and how to run the tests (bash tests/wordstats_test.sh). Edge case: an empty input file must yield total word count 0, unique word count 0, no top-words lines, and exit 0 — fix wordstats.sh if it does not already behave this way, and add an empty-file case to tests/wordstats_test.sh. Run bash tests/wordstats_test.sh from the repo root and make the full suite green before handing off.",
+      "kind": "implementation",
+      "milestone": "1",
+      "fulfills": ["TOY-07", "TOY-08"],
+      "preconditions": ["m1-f2-cli-args completed"],
+      "status": "pending",
+      "attempts": 0,
+      "handoffs": [],
+      "fixes": null
+    },
+    {
+      "id": "m1-scrutiny",
+      "description": "Scrutiny gate for milestone 1. Run the services.yaml commands verbatim (commands.test: bash tests/wordstats_test.sh) from the repo root and record exit codes. Spawn one mission-reviewer per completed milestone-1 implementation feature (m1-f1-core-counting, m1-f2-cli-args, m1-f3-readme-edge-cases); collect their review JSONs under mission/validation/1/scrutiny/reviews/. Triage sharedStateObservations. Write mission/validation/1/scrutiny/synthesis.json with status pass|fail and per-feature outcomes, then your handoff.",
+      "kind": "scrutiny",
+      "milestone": "1",
+      "fulfills": [],
+      "preconditions": ["all milestone-1 implementation features completed"],
+      "status": "pending",
+      "attempts": 0,
+      "handoffs": [],
+      "fixes": null
+    },
+    {
+      "id": "m1-flow-validation",
+      "description": "Flow validation for milestone 1: test every assertion TOY-01 through TOY-08 through the REAL CLI surface via Bash — actually invoke wordstats.sh (and tests/wordstats_test.sh for TOY-08) exactly as each assertion's When clause says, and check the Then clauses (outputs AND exit codes). Do not merely read the code. Save command transcripts/logs as evidence under mission/evidence/1/. Write mission/validation/1/user-testing/cli.json with a per-assertion result (pass|fail|blocked) and evidence paths for each TOY ID, then your handoff.",
+      "kind": "flow-validation",
+      "milestone": "1",
+      "fulfills": ["TOY-01", "TOY-02", "TOY-03", "TOY-04", "TOY-05", "TOY-06", "TOY-07", "TOY-08"],
+      "preconditions": ["all milestone-1 implementation features completed"],
+      "status": "pending",
+      "attempts": 0,
+      "handoffs": [],
+      "fixes": null
+    }
+  ]
+}

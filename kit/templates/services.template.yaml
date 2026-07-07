@@ -1,0 +1,26 @@
+# services.yaml — single source of truth for commands and services in this mission.
+# Workers run commands/services ONLY as declared here. If an entry is broken,
+# workers return to the orchestrator instead of improvising.
+
+workingDirectory: <absolute path to the target repo>
+
+commands:
+  # Named commands workers run verbatim. test is the mandatory gate command.
+  test: <command that runs the full test suite; exit 0 = green>
+  lint: <lint command, or omit if none>
+  typecheck: <typecheck command, or omit if none>
+
+services:
+  # One entry per long-running service. Ports MUST be hardcoded in start/stop/
+  # healthcheck AND repeated in the port field. Use {} if there are no services.
+  # example-server:
+  #   start: PORT=4000 npm run dev
+  #   stop: lsof -ti :4000 | xargs kill
+  #   healthcheck: curl -sf http://localhost:4000/health
+  #   port: 4000
+  #   depends_on: []
+
+notes:
+  # Free-form operational facts: off-limits ports/paths, network restrictions,
+  # scratch directories, anything a worker needs to operate safely.
+  - <note>

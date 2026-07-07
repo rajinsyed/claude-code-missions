@@ -1,0 +1,64 @@
+{
+  "features": [
+    {
+      "id": "m1-f1-user-model",
+      "description": "Implement the User model and persistence layer: define the User record (id, email, displayName, createdAt), add create/read/update functions with input validation at the boundary, and unit tests covering happy path plus invalid-email rejection. TDD: write the tests first, watch them fail, then implement. Gate: project test command exits 0; commit with git add -A && git commit.",
+      "kind": "implementation",
+      "milestone": "1",
+      "fulfills": ["USR-01", "USR-02"],
+      "preconditions": [],
+      "status": "pending",
+      "attempts": 0,
+      "handoffs": [],
+      "fixes": null
+    },
+    {
+      "id": "m1-f2-signup-endpoint",
+      "description": "Implement the POST /signup endpoint on top of the User model from m1-f1: accept JSON {email, displayName}, return 201 with the created user id, 400 on validation failure with a machine-readable error body. Integration tests exercise both paths against a running server. Gate: project test command exits 0; commit.",
+      "kind": "implementation",
+      "milestone": "1",
+      "fulfills": ["USR-03"],
+      "preconditions": ["m1-f1-user-model completed"],
+      "status": "pending",
+      "attempts": 0,
+      "handoffs": [],
+      "fixes": null
+    },
+    {
+      "id": "m1-f3-fix-duplicate-email",
+      "description": "Fix for m1-f1-user-model: scrutiny found that creating two users with the same email succeeds, violating USR-02. Add a uniqueness check in the create path returning a distinct duplicate-email error, plus a regression test that creates the same email twice and asserts the second attempt fails. Gate: project test command exits 0; commit.",
+      "kind": "fix",
+      "milestone": "1",
+      "fulfills": ["USR-02"],
+      "preconditions": ["m1-f1-user-model completed"],
+      "status": "pending",
+      "attempts": 0,
+      "handoffs": [],
+      "fixes": "m1-f1-user-model"
+    },
+    {
+      "id": "m1-scrutiny",
+      "description": "Milestone 1 scrutiny gate: run every services.yaml commands.* verbatim and record exit codes; spawn one mission-reviewer per completed milestone-1 feature (parallel, at most 4 at a time); collect reviews/<feature-id>.json under validation/1/scrutiny/reviews/; triage sharedStateObservations; write validation/1/scrutiny/synthesis.json with status pass|fail and per-feature outcomes; write your handoff.",
+      "kind": "scrutiny",
+      "milestone": "1",
+      "fulfills": [],
+      "preconditions": ["all milestone-1 implementation features completed"],
+      "status": "pending",
+      "attempts": 0,
+      "handoffs": [],
+      "fixes": null
+    },
+    {
+      "id": "m1-flow-validation",
+      "description": "Milestone 1 flow validation: verify assertions USR-01, USR-02, USR-03 through the real surface (API via curl against the running server started per services.yaml). Save request/response logs as evidence under mission/evidence/1/. Write validation/1/user-testing/signup.json with per-assertion pass|fail|blocked plus evidence paths, then your handoff.",
+      "kind": "flow-validation",
+      "milestone": "1",
+      "fulfills": ["USR-01", "USR-02", "USR-03"],
+      "preconditions": ["m1-scrutiny synthesis status pass"],
+      "status": "pending",
+      "attempts": 0,
+      "handoffs": [],
+      "fixes": null
+    }
+  ]
+}

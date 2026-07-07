@@ -1,0 +1,13 @@
+# services.yaml — single source of truth for commands and services in this mission.
+# Workers run commands ONLY as declared here.
+
+workingDirectory: "."
+
+commands:
+  test: bash tests/wordstats_test.sh
+
+services: {}
+
+notes:
+  - No services, no ports, no network — pure local CLI mission.
+  - Run all commands from the repo root (the directory containing mission/).

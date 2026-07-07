@@ -1,0 +1,6 @@
+{
+  "$comment": "One key per assertion ID from validation-contract.md. Value is the string \"pending\" until the assertion is resolved at milestone sealing, then an object: {\"status\":\"passed\",\"milestone\":\"N\"} or {\"status\":\"failed\",\"milestone\":\"N\",\"reason\":\"...\"}.",
+  "USR-01": "pending",
+  "USR-02": "pending",
+  "USR-03": "pending"
+}

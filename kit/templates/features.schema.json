@@ -1,0 +1,70 @@
+{
+  "$comment": "Schema for mission/features.json (architecture §5). Consumed by jq required-key checks, not a JSON-Schema engine — keep in sync with architecture.md.",
+  "type": "object",
+  "required": ["features"],
+  "properties": {
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "description",
+          "kind",
+          "milestone",
+          "fulfills",
+          "preconditions",
+          "status",
+          "attempts",
+          "handoffs",
+          "fixes"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Feature identifier, e.g. m1-f1-slug."
+          },
+          "description": {
+            "type": "string",
+            "description": "Complete, self-contained work order. The worker sees ONLY this + AGENTS.md + contract excerpts + its skill."
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["implementation", "scrutiny", "flow-validation", "fix"]
+          },
+          "milestone": {
+            "type": "string",
+            "description": "Milestone number as a string, e.g. \"1\"."
+          },
+          "fulfills": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Assertion IDs from validation-contract.md; [] allowed for infra features."
+          },
+          "preconditions": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Human-readable gate conditions."
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "in_progress", "completed", "passed", "blocked"]
+          },
+          "attempts": {
+            "type": "number",
+            "description": "Incremented per worker attempt; 3 with failures => blocked."
+          },
+          "handoffs": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Paths of handoff files, appended per attempt."
+          },
+          "fixes": {
+            "type": ["string", "null"],
+            "description": "For kind \"fix\": the original feature id. null otherwise."
+          }
+        }
+      }
+    }
+  }
+}

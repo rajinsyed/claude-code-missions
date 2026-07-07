@@ -1,0 +1,101 @@
+{
+  "$comment": "Schema for mission/handoffs/<ISO-ts>__<feature-id>.json (architecture §6). Consumed by jq required-key checks (including require-handoff.sh), not a JSON-Schema engine.",
+  "type": "object",
+  "required": ["featureId", "timestamp", "successState", "commitId", "handoff"],
+  "properties": {
+    "featureId": {
+      "type": "string",
+      "description": "Must match the feature id in the filename."
+    },
+    "timestamp": {
+      "type": "string",
+      "description": "ISO-8601 timestamp of when the handoff was written."
+    },
+    "successState": {
+      "type": "string",
+      "enum": ["success", "partial", "failure"]
+    },
+    "commitId": {
+      "type": ["string", "null"],
+      "description": "Git commit id for repo changes; null only with justification in the handoff body."
+    },
+    "handoff": {
+      "type": "object",
+      "required": [
+        "salientSummary",
+        "whatWasImplemented",
+        "whatWasLeftUndone",
+        "verification",
+        "discoveredIssues",
+        "skillFeedback"
+      ],
+      "properties": {
+        "salientSummary": {
+          "type": "string",
+          "description": "Non-empty 1-4 sentence summary."
+        },
+        "whatWasImplemented": {
+          "type": "string"
+        },
+        "whatWasLeftUndone": {
+          "type": "string",
+          "description": "May be \"\" when truly complete."
+        },
+        "verification": {
+          "type": "object",
+          "required": ["commandsRun", "interactiveChecks"],
+          "properties": {
+            "commandsRun": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["command", "exitCode", "observation"],
+                "properties": {
+                  "command": { "type": "string" },
+                  "exitCode": { "type": "number" },
+                  "observation": { "type": "string" }
+                }
+              }
+            },
+            "interactiveChecks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["action", "observed"],
+                "properties": {
+                  "action": { "type": "string" },
+                  "observed": { "type": "string" }
+                }
+              },
+              "description": "May be empty for pure-logic features."
+            }
+          }
+        },
+        "discoveredIssues": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["severity", "description", "suggestedFix"],
+            "properties": {
+              "severity": {
+                "type": "string",
+                "enum": ["blocking", "non_blocking", "suggestion"]
+              },
+              "description": { "type": "string" },
+              "suggestedFix": { "type": "string" }
+            }
+          }
+        },
+        "skillFeedback": {
+          "type": "object",
+          "required": ["followedProcedure", "deviations", "suggestedChanges"],
+          "properties": {
+            "followedProcedure": { "type": "boolean" },
+            "deviations": { "type": "array" },
+            "suggestedChanges": { "type": "array" }
+          }
+        }
+      }
+    }
+  }
+}
