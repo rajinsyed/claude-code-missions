@@ -175,7 +175,7 @@ CYAN_FG=$'\033[1;38;5;45m'
 GREEN_FG=$'\033[1;38;5;46m'
 ORANGE_FG=$'\033[1;38;5;214m'
 RED_FG=$'\033[1;38;5;196m'
-CHIP_YELLOW=$'\033[1;30;48;5;220m'   # black on yellow
+CHIP_BRAND=$'\033[1;30;48;5;202m'    # black on #FF5F00 (256-color 202 is exact)
 CHIP_GREEN=$'\033[1;30;48;5;46m'     # black on green
 SEP="  ${DARK}│${RESET}  "
 
@@ -202,7 +202,7 @@ if [ "$COMPLETE" = "1" ]; then
   exit 0
 fi
 
-LINE="${CHIP_YELLOW} MISSION ${RESET} ${BOLD}${DONE}/${TOTAL}${RESET} ${BAR} ${YELLOW_FG}${PCT}%${RESET}"
+LINE="${CHIP_BRAND} MISSION ${RESET} ${BOLD}${DONE}/${TOTAL}${RESET} ${BAR} ${YELLOW_FG}${PCT}%${RESET}"
 
 # Milestone-local progress (only when a feature is running and carries one).
 if [ "$MS" != "-" ] && [ "$MS_TOTAL" -gt 0 ] 2>/dev/null; then
