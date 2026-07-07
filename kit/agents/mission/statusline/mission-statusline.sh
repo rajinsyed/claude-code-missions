@@ -12,8 +12,10 @@
 #   - the command receives ONE JSON object on stdin; the session cwd is
 #     workspace.current_dir (documented as preferred; top-level cwd mirrors
 #     it), the model name is model.display_name, session id is session_id
-#   - every line printed to stdout renders as a statusline row (this script
-#     prints exactly one); ANSI color escapes are supported
+#   - every line printed to stdout renders as its own statusline row; this
+#     script always renders the user's previous statusline first (or a
+#     minimal default), then adds ONE mission row beneath it when the cwd
+#     is inside a mission repo; ANSI color escapes are supported
 #   - it runs after each assistant message, debounced at 300ms — so this
 #     script must stay fast (a handful of jq calls, well under 100ms)
 set -u
@@ -27,8 +29,24 @@ INPUT="$(cat 2>/dev/null || true)"
 CWD="$(printf '%s' "$INPUT" | jq -r '.workspace.current_dir // .cwd // empty' 2>/dev/null || true)"
 MODEL="$(printf '%s' "$INPUT" | jq -r '.model.display_name // empty' 2>/dev/null || true)"
 
-default_line() {
-  # Minimal sane default so the user never gets a blank bar.
+render_base() {
+  # The user's normal statusline, always rendered first: the command that
+  # was in settings.json before enable (run with the original stdin piped
+  # through, same as Claude Code would run it), or a minimal default so
+  # the user never gets a blank bar.
+  if [ -f "$PREV_FILE" ]; then
+    PREV_CMD="$(jq -r '.statusLine.command // empty' "$PREV_FILE" 2>/dev/null || true)"
+    if [ -n "$PREV_CMD" ]; then
+      # Re-emit with a guaranteed trailing newline: if the previous command
+      # prints without one, the mission row would otherwise be glued onto
+      # the same row. Falls through to the default if it prints nothing.
+      prev_out="$(printf '%s' "$INPUT" | /bin/sh -c "$PREV_CMD" 2>/dev/null || true)"
+      if [ -n "$prev_out" ]; then
+        printf '%s\n' "$prev_out"
+        return 0
+      fi
+    fi
+  fi
   base="${CWD##*/}"
   [ -n "$base" ] || base="claude"
   if [ -n "$MODEL" ]; then
@@ -36,7 +54,6 @@ default_line() {
   else
     printf '%s\n' "$base"
   fi
-  exit 0
 }
 
 # --- Locate mission/features.json by walking up from cwd (max 10 levels) ----
@@ -53,23 +70,15 @@ while [ -n "$dir" ] && [ "$i" -lt 10 ]; do
   i=$((i + 1))
 done
 
-# --- No mission → passthrough to the pre-enable statusline ------------------
-if [ -z "$MISSION_DIR" ]; then
-  if [ -f "$PREV_FILE" ]; then
-    PREV_CMD="$(jq -r '.statusLine.command // empty' "$PREV_FILE" 2>/dev/null || true)"
-    if [ -n "$PREV_CMD" ]; then
-      # The saved command is a shell command string (same form settings.json
-      # runs); execute it with the original stdin JSON piped through.
-      printf '%s' "$INPUT" | /bin/sh -c "$PREV_CMD"
-      exit $?
-    fi
-  fi
-  default_line
-fi
+# The user's normal statusline always renders, mission or not.
+render_base
 
-# --- Mission found → render one line from the state files -------------------
+# --- No mission → nothing to add below the normal bar -----------------------
+[ -z "$MISSION_DIR" ] && exit 0
+
+# --- Mission found → add ONE mission row below the normal bar ---------------
 # All reads tolerate missing/partial files: a mission mid-write must never
-# crash the bar — worst case we fall back to the default line.
+# crash the bar — worst case the mission row is simply omitted this refresh.
 CUR_ID=""
 if [ -f "$MISSION_DIR/.current-feature" ]; then
   bl="$(head -n 1 "$MISSION_DIR/.current-feature" 2>/dev/null || true)"
@@ -92,7 +101,8 @@ STATS="$(jq -r --arg cid "$CUR_ID" '
   | @tsv
 ' "$MISSION_DIR/features.json" 2>/dev/null || true)"
 
-[ -z "$STATS" ] && default_line
+# Base row already printed; on unreadable state just skip the mission row.
+[ -z "$STATS" ] && exit 0
 
 IFS=$'\t' read -r TOTAL DONE FIXES COMPLETE KIND ATTEMPTS <<EOF
 $STATS

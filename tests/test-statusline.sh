@@ -167,6 +167,23 @@ for frag in "2/4" "▓" "m1-f3-readme-edges" "retry 2/3" "1 fix queued"; do
   esac
 done
 
+# Two-row contract: the user's normal statusline renders FIRST, the mission
+# row on its own line BELOW it.
+mkdir -p "$HOME/.claude"
+printf '{"settingsExisted": true, "statusLine": {"type": "command", "command": "echo BASELINE"}}\n' \
+  > "$HOME/.claude/mission-kit-statusline-prev.json"
+out="$(printf '{"workspace":{"current_dir":"%s"},"model":{"display_name":"Opus"}}' "$REPO/src/nested" | "$SL_SCRIPT")"
+first="$(printf '%s\n' "$out" | head -n 1)"
+last="$(printf '%s\n' "$out" | tail -n 1)"
+if [ "$first" != "BASELINE" ]; then
+  note "STL-03: first row is not the passthrough statusline (got '$first')"
+  stl03=1
+fi
+case "$last" in
+  *"▣"*"m1-f3-readme-edges"*) : ;;
+  *) note "STL-03: last row is not the mission row (got '$last')"; stl03=1 ;;
+esac
+
 # all passed → mission complete
 cat > "$MDIR/features.json" <<'EOF'
 {"features": [

@@ -143,13 +143,14 @@ Interactive sessions don't need any of this — the trust dialog and live permis
 
 ## Live statusline (opt-in)
 
-An optional Claude Code statusline shows mission progress whenever your session's cwd is inside a repo with an active `mission/` dir:
+An optional Claude Code statusline shows mission progress whenever your session's cwd is inside a repo with an active `mission/` dir. Your normal statusline keeps rendering exactly as before; the mission row appears on its own line beneath it (each printed line is a row, per the statusline contract):
 
 ```
+<your normal statusline, unchanged>
 ▣ 3/5 ▓▓▓░░ · m1-f3-readme-edges (worker 4m) · 1 fix queued
 ```
 
-Progress counts and a compact bar, the feature currently running (kind, elapsed time, and `retry 2/3` when it's on a repeat attempt), queued `fix` features, and a green `✔ mission complete` when everything has passed. In any session *without* a mission it's a transparent passthrough: if you had a statusline before enabling, that exact command keeps rendering your bar; if you didn't, you get a minimal `<dir> · <model>` default — never a blank bar.
+The mission row shows progress counts and a compact bar, the feature currently running (kind, elapsed time, and `retry 2/3` when it's on a repeat attempt), queued `fix` features, and a green `✔ mission complete` when everything has passed. In any session *without* a mission you see just your normal bar: the exact statusline command you had before enabling keeps running (with the same stdin Claude Code would give it), or a minimal `<dir> · <model>` default if you had none — never a blank bar.
 
 ```bash
 ./statusline.sh enable    # opt in
