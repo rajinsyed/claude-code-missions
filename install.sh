@@ -134,13 +134,17 @@ for rel in $INSTALL_PATHS; do
   done < "$LIST_TMP"
 done
 
-# --- Hook scripts must be executable ----------------------------------------
+# --- Hook and statusline scripts must be executable --------------------------
 for hook in guard-mission-state.sh require-handoff.sh; do
   HP="$DEST/agents/mission/hooks/$hook"
   if [ -f "$HP" ]; then
     chmod +x "$HP" || exit 1
   fi
 done
+SLP="$DEST/agents/mission/statusline/mission-statusline.sh"
+if [ -f "$SLP" ]; then
+  chmod +x "$SLP" || exit 1
+fi
 
 # --- Write manifest: files first, then dirs (deepest-first), no duplicates ---
 # The manifest lists itself too (it is a created path); uninstall.sh removes

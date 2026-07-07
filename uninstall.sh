@@ -14,6 +14,19 @@ if [ ! -f "$MANIFEST" ]; then
   exit 1
 fi
 
+# Statusline opt-in: if it is enabled, run the disable path FIRST so no
+# dangling settings.json statusLine command points at a removed script.
+SL_PREV="$DEST/mission-kit-statusline-prev.json"
+if [ -f "$SL_PREV" ]; then
+  SL_SCRIPT="$(cd "$(dirname "$0")" && pwd)/statusline.sh"
+  if [ -x "$SL_SCRIPT" ]; then
+    "$SL_SCRIPT" disable \
+      || echo "uninstall.sh: WARNING: statusline disable failed — check statusLine in $DEST/settings.json manually" >&2
+  else
+    echo "uninstall.sh: WARNING: statusline is enabled but $SL_SCRIPT is missing — restore the statusLine key in $DEST/settings.json from $SL_PREV manually" >&2
+  fi
+fi
+
 # Pass 1: remove files (and symlinks). Only paths inside ~/.claude are honored.
 while IFS= read -r p; do
   [ -n "$p" ] || continue

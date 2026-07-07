@@ -107,9 +107,9 @@ Resume is free because state is files: re-invoking `/mission-run` re-reads every
 
 I wanted this to be something you can try without fear of it haunting your `~/.claude` forever. Concretely:
 
-- `install.sh` copies **exactly three namespaced paths** — `agents/mission/`, `skills/mission-plan/`, `skills/mission-run/` — into `~/.claude`, and records every created path in one manifest file, `~/.claude/mission-kit-manifest.txt` (13 entries on a typical install; a few more if it had to create `~/.claude` or its parent dirs itself). It refuses to overwrite anything pre-existing unless you pass `--force`.
+- `install.sh` copies **exactly three namespaced paths** — `agents/mission/`, `skills/mission-plan/`, `skills/mission-run/` — into `~/.claude`, and records every created path in one manifest file, `~/.claude/mission-kit-manifest.txt` (15 entries on a typical install; a few more if it had to create `~/.claude` or its parent dirs itself). It refuses to overwrite anything pre-existing unless you pass `--force`.
 - `uninstall.sh` removes exactly the manifest's paths and nothing else. The test suite snapshot-diffs `find ~/.claude` before install and after uninstall (in a sandboxed fake home) and requires them byte-identical — including the pristine-machine case where `~/.claude` didn't exist at all.
-- Installed but not invoked, the kit has **zero impact on normal sessions**: no `settings.json` edits, no global hooks (all hooks live in the mission agents' frontmatter and only run while a mission agent runs), both skills carry `disable-model-invocation: true` so they only fire when you type them, and every agent description forbids delegation outside a mission run.
+- Installed but not invoked, the kit has **zero impact on normal sessions**: no `settings.json` edits (the opt-in statusline below is the one sanctioned exception, and only if you explicitly enable it), no global hooks (all hooks live in the mission agents' frontmatter and only run while a mission agent runs), both skills carry `disable-model-invocation: true` so they only fire when you type them, and every agent description forbids delegation outside a mission run.
 
 Per-mission `mission/` dirs live in the repos you ran missions in; delete them per repo if you want them gone.
 
@@ -140,6 +140,26 @@ runs the whole loop non-interactively to completion. One trap to know about firs
    ```
 
 Interactive sessions don't need any of this — the trust dialog and live permission prompts handle it. `toy-mission/README.md` shows the same steps applied to a scratch repo.
+
+## Live statusline (opt-in)
+
+An optional Claude Code statusline shows mission progress whenever your session's cwd is inside a repo with an active `mission/` dir:
+
+```
+▣ 3/5 ▓▓▓░░ · m1-f3-readme-edges (worker 4m) · 1 fix queued
+```
+
+Progress counts and a compact bar, the feature currently running (kind, elapsed time, and `retry 2/3` when it's on a repeat attempt), queued `fix` features, and a green `✔ mission complete` when everything has passed. In any session *without* a mission it's a transparent passthrough: if you had a statusline before enabling, that exact command keeps rendering your bar; if you didn't, you get a minimal `<dir> · <model>` default — never a blank bar.
+
+```bash
+./statusline.sh enable    # opt in
+./statusline.sh status    # wired up? mission detected here?
+./statusline.sh disable   # restore your previous statusLine exactly
+```
+
+This is deliberately **excluded from the plain install** so the reversibility guarantee above holds without qualification: `./install.sh` never touches `settings.json`. Enabling the statusline is the kit's one sanctioned `settings.json` interaction, and it exists only behind this explicit opt-in — `enable` saves your current `statusLine` value plus a byte backup of the file, sets that one key to the kit script, and changes nothing else; `disable` restores the original file byte-for-byte (or just the key, if you changed other settings in between); `./uninstall.sh` runs the disable path automatically if the statusline is still enabled, so no dangling command is left pointing at a removed script.
+
+Caveat if you run tools that manage `settings.json` (account switchers, dotfile syncers): they can rewrite the file and drop the `statusLine` key. If the bar disappears, run `./statusline.sh status` — it reports whether the key survived and how to re-wire it.
 
 ## Requirements
 
@@ -184,10 +204,10 @@ The attempt is counted, the feature goes back to `pending`, and a later worker r
 The test suite is the contract — it's local-first, no CI needed:
 
 ```bash
-bash tests/run-all.sh   # 37 structural tests across 8 scripts, must all PASS
+bash tests/run-all.sh   # 41 structural tests across 9 scripts, must all PASS
 ```
 
-The tests pin exact strings in the agent, skill, and README files (isolation sentences, hook wiring, schema shapes, this README's Known Gaps section), so run the suite after *any* edit. Installer tests run against sandboxed fake homes created with `mktemp -d` and never touch your real `~/.claude`. The kit is 4 subagents, 2 skills, 2 hooks, and 2 shell scripts — small enough to read in one sitting, and PRs that keep it that way are welcome.
+The tests pin exact strings in the agent, skill, and README files (isolation sentences, hook wiring, schema shapes, this README's Known Gaps section), so run the suite after *any* edit. Installer tests run against sandboxed fake homes created with `mktemp -d` and never touch your real `~/.claude`. The kit is 4 subagents, 2 skills, 2 hooks, an opt-in statusline, and 3 shell scripts — small enough to read in one sitting, and PRs that keep it that way are welcome.
 
 ## License
 
